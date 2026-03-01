@@ -1,0 +1,27 @@
+whisper:
+  model: base
+  language: en
+  device: cpu
+
+ollama:
+  host: "http://localhost:11434"
+  model: "llama2"
+  prompt_template: |
+    Please improve this transcribed text by:
+    - Fixing any spelling or grammar errors
+    - Adding proper punctuation
+    - Making it more readable while preserving the meaning
+
+    Original text: {text}
+
+    Improved text:
+
+audio:
+  sample_rate: 16000
+  channels: 1
+  silence_threshold: 0.01
+  silence_duration: 2.0
+
+clipboard:
+  show_notifications: true
+  notification_title: "SpeakType"
