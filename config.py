@@ -14,6 +14,7 @@ LEARNING NOTE: This file demonstrates:
 
 # TODO: Import the yaml library for parsing YAML files
 # Install with: pip install PyYAML
+from multiprocessing import Value
 import yaml
 
 # TODO: Import pathlib for working with file paths
@@ -21,66 +22,33 @@ from pathlib import Path
 
 
 class Config:
-    """
-    Configuration class that provides access to settings using dot-notation.
-
-    LEARNING NOTE: This class shows how to:
-    - Store nested configuration data
-    - Provide a clean API for accessing settings
-    - Handle default values gracefully
-    """
-
     def __init__(self, config_data):
-        """
-        Initialize the Config object with configuration data.
+        if not isinstance(config_data, dict):
+            raise ValueError("Invalid config data, config data is not a dictionary")
 
-        Args:
-            config_data: Dictionary containing all configuration settings
+        self.config = config_data
+        print("Config data loaded")
 
-        TODO: Implement this method to:
-        1. Store config_data as an instance variable
-        2. Validate that it's a dictionary
-        3. Print a message showing config was loaded successfully
-        """
-        pass
+    def get(self, key_path: str, default=None):
+        tokens = key_path.split(".")
+        first_token = tokens[0]
 
-    def get(self, key_path, default=None):
-        """
-        Get a configuration value using dot-notation.
+        if not first_token in self.config:
+            return default
 
-        Args:
-            key_path: String like "whisper.model" or "ollama.host"
-            default: Value to return if key is not found
+        value = self.config[first_token]
 
-        Returns:
-            The configuration value or default
-
-        LEARNING NOTE: This method demonstrates:
-        - Parsing dot-notation strings
-        - Navigating nested dictionaries
-        - Providing fallback values
-
-        TODO: Implement this method to:
-        1. Split key_path by dots (e.g., "whisper.model" -> ["whisper", "model"])
-        2. Navigate through the nested config dictionary
-        3. Return the value if found, or default if not found
-        4. Handle cases where intermediate keys don't exist
-        """
-        pass
+        if isinstance(value, dict) and len(tokens) > 1:
+            return self.get(".".join(token[1:]), value)
+        else:
+            return value
 
     def get_whisper_config(self):
-        """
-        Get Whisper-specific configuration.
+        if "whisper" in self.config:
+            whisper_config = self.config.whisper
+            return whisper_config
 
-        Returns:
-            Dictionary with whisper settings (model, language, etc.)
-
-        TODO: Implement this method to:
-        1. Use self.get() to retrieve whisper configuration
-        2. Return a dictionary with keys like 'model', 'language'
-        3. Provide sensible defaults if settings are missing
-        """
-        pass
+        raise ValueError("'whisper' key not found in config")
 
     def get_ollama_config(self):
         """
@@ -100,27 +68,7 @@ class Config:
 def load_config(config_path="config.yaml"):
     """
     Load configuration from a YAML file.
-
-    Args:
-        config_path: Path to the YAML configuration file
-
-    Returns:
-        Config object with loaded settings
-
-    LEARNING NOTE: This function demonstrates:
-    - Reading files safely
-    - Parsing YAML data
-    - Merging with default values
-    - Error handling for missing files
-
-    TODO: Implement this function to:
-    1. Define default configuration (create a dictionary with sensible defaults)
-    2. Check if config file exists using pathlib
-    3. If file exists, read and parse YAML content
-    4. Merge user config with defaults (user values override defaults)
-    5. Validate important settings (e.g., whisper model should be valid)
-    6. Return a Config object with the merged configuration
-    7. Handle errors gracefully (file not found, invalid YAML, etc.)
+    Returns config object with loaded settings
     """
 
     config_file = open_file(config_path)
@@ -157,23 +105,10 @@ def validate_config(config_data):
             f"Invalid Whisper model. ${whisper_model} is not a valid model. Valid models: ${str(valid_whisper_models)}"
         )
 
-    # # Validate audio settings
-    # audio_config = config_data.get("audio", {})
-    # sample_rate = audio_config.get("sample_rate", 16000)
-    # if not isinstance(sample_rate, int) or sample_rate <= 0:
-    #     print(f"Warning: Invalid sample rate '{sample_rate}'. Using 16000 instead.")
-    #     config_data["audio"]["sample_rate"] = 16000
+    # Validate audio settings
+    sample_rate = config_data.get("audio", {}).get("sample_rate")
+    if sample_rate is None:
+        raise ValueError("Audio sample rate not found in config")
 
-    # channels = audio_config.get("channels", 1)
-    # if channels not in [1, 2]:
-    #     print(f"Warning: Invalid channels '{channels}'. Using 1 (mono) instead.")
-    #     config_data["audio"]["channels"] = 1
-
-
-"""
-Next steps:
-Merging Default config with user config is a lot of work and introduces errors.
-Instead assume user has a config.yaml file with their settings.
-Update README to include correct config structure
-If a value is found missing from config, throw error and ask to check config settings from README
-"""
+    if sample_rate <= 0:
+        raise ValueError("Audio sample rate must be greater than 0")

@@ -23,6 +23,7 @@ LEARNING NOTE: This file demonstrates:
 # from transcription import WhisperTranscriber
 # from text_improver import TextImprover
 # from clipboard_manager import ClipboardManager
+
 from config import load_config
 
 
@@ -30,17 +31,17 @@ class SpeakTypeApp:
     """
     Main application class that manages the menu bar interface
     and coordinates between different components.
-    
+
     LEARNING NOTE: This class shows how to:
     - Create a menu bar app with multiple menu items
     - Handle different application states (IDLE, RECORDING, PROCESSING)
     - Coordinate between different components
     """
-    
+
     def __init__(self, config):
         """
         Initialize the app with configuration and create all components.
-        
+
         Args:
             config: Configuration object with settings for all components
 
@@ -52,14 +53,14 @@ class SpeakTypeApp:
         5. Store config and components as instance variables
         """
         print("SpeakTypeApp initialized with config:", config)
-    
+
     def start_recording(self, sender):
         """
         Start audio recording when user clicks "Start Recording" menu item.
-        
+
         Args:
             sender: The menu item that triggered this action
-            
+
         TODO: Implement this method to:
         1. Call audio_handler.start_recording()
         2. Update UI to show recording state (change menu item text/color)
@@ -67,14 +68,14 @@ class SpeakTypeApp:
         4. Print a message to confirm recording started
         """
         pass
-    
+
     def stop_recording(self, sender):
         """
         Stop recording and start processing pipeline.
-        
+
         Args:
             sender: The menu item that triggered this action
-            
+
         TODO: Implement this method to:
         1. Call audio_handler.stop_recording() to get audio data
         2. Update UI to show processing state
@@ -86,28 +87,28 @@ class SpeakTypeApp:
         5. Return to IDLE state when done
         """
         pass
-    
+
     def copy_last(self, sender):
         """
         Copy the last processed result to clipboard.
-        
+
         Args:
             sender: The menu item that triggered this action
-            
+
         TODO: Implement this method to:
         1. Get the last processed text from storage
         2. Use clipboard_manager to copy it
         3. Show a notification to confirm copy
         """
         pass
-    
+
     def quit_app(self, sender):
         """
         Clean up resources and quit the application.
-        
+
         Args:
             sender: The menu item that triggered this action
-            
+
         TODO: Implement this method to:
         1. Clean up any resources (close audio streams, unload models)
         2. Save any necessary state
@@ -119,12 +120,12 @@ class SpeakTypeApp:
 def main():
     """
     Main entry point for the application.
-    
+
     LEARNING NOTE: This function demonstrates:
     - Loading configuration from a file
     - Creating and running the main application
     - Basic error handling
-    
+
     TODO: Implement this function to:
     1. Load configuration from config.yaml (use load_config function)
     2. Create a SpeakTypeApp instance with the config
