@@ -132,7 +132,8 @@ def main():
     3. Run the menu bar app (this will keep it running until user quits)
     4. Add basic error handling for config loading
     """
-    config = load_config()
+    config = load_config("./config.yaml")
+    print(config)
     app = SpeakTypeApp(config)
     # somehow call rumps.run() from here and somehow that .run is inside SpeakTypeApp class
     pass
@@ -141,5 +142,4 @@ def main():
 # This is the standard Python pattern for making a file executable
 # When this file is run directly (not imported), __name__ will be "__main__"
 if __name__ == "__main__":
-    # TODO: Call the main() function to start the application
     main()
