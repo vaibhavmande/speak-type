@@ -25,6 +25,7 @@ LEARNING NOTE: This file demonstrates:
 # from clipboard_manager import ClipboardManager
 
 from config import load_config
+import yaml
 
 
 class SpeakTypeApp:
@@ -52,7 +53,9 @@ class SpeakTypeApp:
         4. Set initial state to IDLE
         5. Store config and components as instance variables
         """
-        print("SpeakTypeApp initialized with config:", config)
+
+        self.config = config.config
+        print("SpeakTypeApp initialized with config:", self.config)
 
     def start_recording(self, sender):
         """
@@ -132,11 +135,13 @@ def main():
     3. Run the menu bar app (this will keep it running until user quits)
     4. Add basic error handling for config loading
     """
-    config = load_config("./config.yaml")
-    print(config)
-    app = SpeakTypeApp(config)
-    # somehow call rumps.run() from here and somehow that .run is inside SpeakTypeApp class
-    pass
+    try:
+        config = load_config("config.yaml")
+        app = SpeakTypeApp(config)
+        # somehow call rumps.run() from here and somehow that .run is inside SpeakTypeApp class
+    except Exception as e:
+        print(f"Error loading config: {e}")
+        return
 
 
 # This is the standard Python pattern for making a file executable

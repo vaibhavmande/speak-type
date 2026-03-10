@@ -51,21 +51,24 @@ def load_config(config_path="config.yaml"):
     Returns config object with loaded settings
     """
 
+    config_file_path = Path(config_path)
+    if not config_file_path.exists():
+        raise Exception(f"Config file {config_path} not found.")
+
     with Path(config_path).open() as config_file:
         if config_file is None:
-            print(f"Config file {config_path} not found. Using default configuration.")
-            return None
+            raise Exception(f"Unable to load config file {config_path}")
 
-    try:
-        config_data = yaml.safe_load(config_file)
-    except yaml.YAMLError as e:
-        raise Exception(f"Error parsing YAML file {config_path}: {e}")
-    except Exception as e:
-        raise Exception(f"Error reading config file {config_path}: {e}")
+        try:
+            config_data = yaml.safe_load(config_file)
+        except yaml.YAMLError as e:
+            raise Exception(f"Error parsing YAML file {config_path}: {e}")
+        except Exception as e:
+            raise Exception(f"Error reading config file {config_path}: {e}")
 
-    validate_config(config_data)
+        validate_config(config_data)
 
-    return Config(config_data)
+        return Config(config_data)
 
 
 def validate_config(config_data):
