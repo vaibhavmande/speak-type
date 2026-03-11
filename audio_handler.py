@@ -51,6 +51,7 @@ class AudioHandler:
         4. Create an empty buffer for storing audio data
         5. Set initial state (not recording)
         """
+        self.audio_config = config.get_audio_config()
         pass
 
     def start_recording(self):

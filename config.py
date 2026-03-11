@@ -44,6 +44,12 @@ class Config:
 
         return self.get("ollama")
 
+    def get_app_config(self):
+        if "app" not in self.config:
+            raise ValueError("'app' key not found in config")
+
+        return self.get("app")
+
 
 def load_config(config_path="config.yaml"):
     """

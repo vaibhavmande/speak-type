@@ -25,10 +25,10 @@ LEARNING NOTE: This file demonstrates:
 # from clipboard_manager import ClipboardManager
 
 from config import load_config
-import yaml
+import rumps
 
 
-class SpeakTypeApp:
+class SpeakTypeApp(rumps.App):
     """
     Main application class that manages the menu bar interface
     and coordinates between different components.
@@ -55,8 +55,20 @@ class SpeakTypeApp:
         """
 
         self.config = config.config
+        self.config_instance = config
+        self.app_config = config.get_app_config()
+
+        self.audio_handler = AudioHandler(config)
+        # self.transcriber = WhisperTranscriber(config)
+        # self.improver = TextImprover(config)
+        # self.clipboard = ClipboardManager(config)
+
+        super().__init__(self.app_config.get("idle_icon"))
+        self.menu = self.app_config.get("menu")
+
         print("SpeakTypeApp initialized with config:", self.config)
 
+    @rumps.clicked("Start Recording")
     def start_recording(self, sender):
         """
         Start audio recording when user clicks "Start Recording" menu item.
@@ -70,6 +82,10 @@ class SpeakTypeApp:
         3. Update internal state to RECORDING
         4. Print a message to confirm recording started
         """
+
+        print("Starting recording...")
+        self.title = self.app_config.get("recording_icon")
+
         pass
 
     def stop_recording(self, sender):
@@ -138,9 +154,9 @@ def main():
     try:
         config = load_config("config.yaml")
         app = SpeakTypeApp(config)
-        # somehow call rumps.run() from here and somehow that .run is inside SpeakTypeApp class
+        app.run()
     except Exception as e:
-        print(f"Error loading config: {e}")
+        print(f"Failed to start application: {e}")
         return
 
 
