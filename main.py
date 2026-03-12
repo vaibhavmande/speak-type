@@ -54,6 +54,12 @@ class SpeakTypeApp(rumps.App):
         5. Store config and components as instance variables
         """
 
+        # Implement app state IDLE, RECORDING, PROCESSING
+        # Change state from a member variable
+        # inside that function change menu icon and titles
+
+        self.state = "IDLE"
+
         self.config = config.config
         self.config_instance = config
         self.app_config = config.get_app_config()
@@ -85,6 +91,8 @@ class SpeakTypeApp(rumps.App):
 
         print("Starting recording...")
         self.title = self.app_config.get("recording_icon")
+
+        self.audio_handler.start_recording()
 
         pass
 

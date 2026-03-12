@@ -11,19 +11,12 @@ LEARNING NOTE: This file demonstrates:
 - Silence detection using RMS calculation
 """
 
-# TODO: Import PyAudio for audio recording
-# Install with: pip install pyaudio
-# import pyaudio
-
-# TODO: Import numpy for audio processing
-# Install with: pip install numpy
-# import numpy as np
+import pyaudio
+import numpy as np
+import time
 
 # TODO: Import threading for background audio processing
 # import threading
-
-# TODO: Import time for measuring recording duration
-# import time
 
 
 class AudioHandler:
@@ -52,6 +45,18 @@ class AudioHandler:
         5. Set initial state (not recording)
         """
         self.audio_config = config.get_audio_config()
+
+        self.recording = False
+        self.start_time = None
+        self.audio_buffer = []
+        self.stream = None
+
+        self.format = pyaudio.paInt16
+        self.audio = pyaudio.PyAudio()
+        self.channels = self.audio_config.get("channels", 1)
+        self.sample_rate = self.audio_config.get("sample_rate", 16000)
+        self.chunk_size = self.audio_config.get("chunk_size", 1024)
+
         pass
 
     def start_recording(self):
@@ -80,7 +85,29 @@ class AudioHandler:
         6. Record start time
         7. Return True on success, False on failure
         """
-        pass
+
+        if self.recording:
+            return False
+
+        try:
+            self.stream = self.audio.open(
+                format=self.format,
+                channels=self.channels,
+                rate=self.sample_rate,
+                input=True,
+                frames_per_buffer=self.chunk_size,
+                stream_callback=self._audio_callback,
+            )
+            self.stream.start_stream()
+            self.recording = True
+            self.start_time = time.time()
+            self.audio_buffer = []
+            print("Recording started")
+            return True
+
+        except Exception as e:
+            print(f"Error starting recording: {e}")
+            return False
 
     def stop_recording(self):
         """
@@ -88,44 +115,44 @@ class AudioHandler:
 
         Returns:
             numpy array containing the recorded audio, or None if error
-
-        LEARNING NOTE: This method demonstrates:
-        - Stopping audio streams safely
-        - Converting audio data to numpy arrays
-        - Cleaning up audio resources
-
-        TODO: Implement this method to:
-        1. Check if recording (return None if not)
-        2. Stop the audio stream
-        3. Close the audio stream
-        4. Terminate PyAudio instance
-        5. Convert buffer data to numpy array (float32 format)
-        6. Clear the buffer
-        7. Return the audio data
-        8. Handle any errors gracefully
         """
-        pass
+        if not self.is_recording():
+            return None
+
+        try:
+            self.stream.stop_stream()
+            self.stream.close()
+            self.recording = False
+
+            if self.audio_buffer:
+                audio_data = np.concatenate(self.audio_buffer)
+                return audio_data
+            else:
+                return None
+
+        except Exception as e:
+            print(f"Error stopping recording: {e}")
+            return None
+
+        finally:
+            self.audio.terminate()
+            self.audio_buffer = []
 
     def get_audio_level(self):
         """
         Calculate the current audio level (RMS amplitude).
-
-        Returns:
-            Current audio level between 0.0 and 1.0
-
-        LEARNING NOTE: This method demonstrates:
-        - Calculating RMS (Root Mean Square) for audio amplitude
-        - Normalizing audio levels
-        - Real-time audio monitoring
-
-        TODO: Implement this method to:
-        1. Check if recording and have recent audio data
-        2. Take the last N samples from buffer (e.g., last 0.1 seconds)
-        3. Calculate RMS: sqrt(mean(samples^2))
-        4. Normalize to 0.0-1.0 range (divide by max possible value)
-        5. Return the level, or 0.0 if not recording
         """
-        pass
+        if not self.is_recording():
+            return 0.0
+
+        recent_audio = self.audio_buffer[-1] if self.audio_buffer else np.array([])
+        if not recent_audio:
+            return 0.0
+
+        rms = np.sqrt(np.mean(recent_audio**2))
+
+        # Normalize to 0.0-1.0 range
+        return min(rms * 10, 1.0)
 
     def _audio_callback(self, in_data, frame_count, time_info, status):
         """
@@ -139,43 +166,24 @@ class AudioHandler:
 
         Returns:
             Tuple of (output_data, continue_flag)
-
-        LEARNING NOTE: This method demonstrates:
-        - Handling real-time audio callbacks
-        - Converting raw audio bytes to usable format
-        - Buffer management for streaming audio
-
-        TODO: Implement this method to:
-        1. Convert raw audio bytes to numpy array (int16 -> float32)
-        2. Append to the audio buffer
-        3. Check for silence if silence detection is enabled
-        4. Return (None, pyaudio.paContinue) to continue recording
         """
-        pass
+        audio_chunk = np.frombuffer(in_data, dtype=np.int16)
+        audio_chunk = audio_chunk.astype(np.float32) / 32768.0
+        self.audio_buffer.append(audio_chunk)
+
+        return (None, pyaudio.paContinue)
 
     def is_recording(self):
         """
         Check if currently recording audio.
-
-        Returns:
-            True if recording, False otherwise
-
-        TODO: Implement this method to:
-        1. Check if audio stream exists and is active
-        2. Return appropriate boolean value
         """
-        pass
+        return self.stream is not None and self.recording is True
 
     def get_recording_duration(self):
         """
         Get the current recording duration in seconds.
-
-        Returns:
-            Recording duration in seconds, or 0 if not recording
-
-        TODO: Implement this method to:
-        1. Check if recording
-        2. Calculate duration from start time
-        3. Return duration in seconds
         """
-        pass
+
+        if not self.is_recording():
+            return 0.0
+        return time.time() - self.start_time

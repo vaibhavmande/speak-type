@@ -27,6 +27,7 @@ audio:
   channels: 1
   silence_threshold: 0.01
   silence_duration: 2.0
+  chunk_size: 1024
 
 clipboard:
   show_notifications: true

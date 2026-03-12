@@ -15,6 +15,7 @@ A privacy-first, local-only speech-to-text application that converts speech to i
 ### Prerequisites
 
 1. **Install Ollama**
+
    ```bash
    brew install ollama
    ollama serve
@@ -22,6 +23,7 @@ A privacy-first, local-only speech-to-text application that converts speech to i
    ```
 
 2. **Install whisper.cpp**
+
    ```bash
    git clone https://github.com/ggml-org/whisper.cpp
    cd whisper.cpp
@@ -29,12 +31,19 @@ A privacy-first, local-only speech-to-text application that converts speech to i
    bash ./models/download-ggml-model.sh base
    ```
 
-3. **Install Python dependencies**
+3. **Install PortAudio (required for PyAudio on macOS)**
+
+   ```bash
+   brew install portaudio
+   ```
+
+4. **Install Python dependencies**
+
    ```bash
    pip install -r requirements.txt
    ```
 
-4. **Grant microphone permissions** (macOS System Preferences → Security & Privacy → Privacy)
+5. **Grant microphone permissions** (macOS System Preferences → Security & Privacy → Privacy)
 
 ### Usage
 
@@ -66,6 +75,7 @@ The app will appear in your menu bar. Click the menu icon to start recording, sp
 ## Configuration
 
 Edit `config.yaml` to customize:
+
 - Whisper model selection
 - LLM model and settings
 - Audio parameters
@@ -76,7 +86,7 @@ Edit `config.yaml` to customize:
 ✅ All processing happens locally  
 ✅ No external API calls  
 ✅ Audio buffers cleared after processing  
-✅ No transcription logging by default  
+✅ No transcription logging by default
 
 ## Development
 
