@@ -2,6 +2,7 @@ app:
   title: "SpeakType"
   idle_icon: "🎙️"
   recording_icon: "⏺️"
+  processing_icon: "⏳"
   menu: ["Start Recording", "Stop Recording", "Copy Last", "Quit"]
 
 whisper:

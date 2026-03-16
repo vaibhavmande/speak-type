@@ -19,12 +19,16 @@ LEARNING NOTE: This file demonstrates:
 # import rumps
 
 # TODO: Import our custom modules (we'll create these next)
-# from audio_handler import AudioHandler
+from typing import Literal
+from audio_handler import AudioHandler
+
 # from transcription import WhisperTranscriber
 # from text_improver import TextImprover
 # from clipboard_manager import ClipboardManager
 
 from config import load_config
+from app_states import AppStates
+
 import rumps
 
 
@@ -58,8 +62,6 @@ class SpeakTypeApp(rumps.App):
         # Change state from a member variable
         # inside that function change menu icon and titles
 
-        self.state = "IDLE"
-
         self.config = config.config
         self.config_instance = config
         self.app_config = config.get_app_config()
@@ -69,10 +71,57 @@ class SpeakTypeApp(rumps.App):
         # self.improver = TextImprover(config)
         # self.clipboard = ClipboardManager(config)
 
-        super().__init__(self.app_config.get("idle_icon"))
-        self.menu = self.app_config.get("menu")
+        super(SpeakTypeApp, self).__init__(self.app_config.get("title"))
+        menu_items = self.app_config.get("menu")
+        self.menu = [rumps.MenuItem(item) for item in menu_items]
+
+        self.update_app_state(AppStates.IDLE)
 
         print("SpeakTypeApp initialized with config:", self.config)
+
+    def update_app_state(self, state):
+        """
+        Update the application state and UI.
+        IDLE, RECORDING, PROCESSING
+        activate/deactivate menu items
+        """
+        self.state = state
+
+        start_button = self.menu.get("Start Recording")
+        stop_button = self.menu.get("Stop Recording")
+
+        match self.state:
+            case AppStates.IDLE:
+                stop_button.set_callback(None)
+                start_button.set_callback(self.start_recording)
+                pass
+            case AppStates.RECORDING:
+                start_button.set_callback(None)
+                stop_button.set_callback(self.stop_recording)
+                pass
+            case AppStates.PROCESSING:
+                start_button.set_callback(None)
+                stop_button.set_callback(None)
+                pass
+
+    def get_app_metadata(self):
+        """
+        Get the application metadata.
+        get icon, title, menu items
+
+        """
+
+        match self.state:
+            case AppStates.IDLE:
+                title = self.app_config.get("idle_icon")
+            case AppStates.RECORDING:
+                title = self.app_config.get("recording_icon")
+            case AppStates.PROCESSING:
+                title = self.app_config.get("processing_icon")
+            case _:
+                title = self.app_config.get("idle_icon")
+
+        return {"title": title}
 
     @rumps.clicked("Start Recording")
     def start_recording(self, sender):
@@ -90,12 +139,11 @@ class SpeakTypeApp(rumps.App):
         """
 
         print("Starting recording...")
-        self.title = self.app_config.get("recording_icon")
-
+        self.update_app_state(AppStates.RECORDING)
+        self.title = self.get_app_metadata().get("title")
         self.audio_handler.start_recording()
 
-        pass
-
+    @rumps.clicked("Stop Recording")
     def stop_recording(self, sender):
         """
         Stop recording and start processing pipeline.
@@ -113,7 +161,9 @@ class SpeakTypeApp(rumps.App):
         4. Update state to PROCESSING during pipeline
         5. Return to IDLE state when done
         """
-        pass
+
+        audio_data = self.audio_handler.stop_recording()
+        print("Audio data:", audio_data)
 
     def copy_last(self, sender):
         """
@@ -165,6 +215,9 @@ def main():
         app.run()
     except Exception as e:
         print(f"Failed to start application: {e}")
+        import traceback
+
+        traceback.print_exc()
         return
 
 

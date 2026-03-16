@@ -50,6 +50,12 @@ class Config:
 
         return self.get("app")
 
+    def get_audio_config(self):
+        if "audio" not in self.config:
+            raise ValueError("'audio' key not found in config")
+
+        return self.get("audio")
+
 
 def load_config(config_path="config.yaml"):
     """

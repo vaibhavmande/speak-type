@@ -1,0 +1,4 @@
+class AppStates:
+    IDLE = "IDLE"
+    RECORDING = "RECORDING"
+    PROCESSING = "PROCESSING"
