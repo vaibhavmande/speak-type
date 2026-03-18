@@ -21,11 +21,12 @@ LEARNING NOTE: This file demonstrates:
 # TODO: Import our custom modules (we'll create these next)
 from typing import Literal
 from audio_handler import AudioHandler
+from transcription import WhisperTranscriber
 
-# from transcription import WhisperTranscriber
 # from text_improver import TextImprover
 # from clipboard_manager import ClipboardManager
 
+import traceback
 from config import load_config
 from app_states import AppStates
 
@@ -67,7 +68,7 @@ class SpeakTypeApp(rumps.App):
         self.app_config = config.get_app_config()
 
         self.audio_handler = AudioHandler(config)
-        # self.transcriber = WhisperTranscriber(config)
+        self.transcriber = WhisperTranscriber(config)
         # self.improver = TextImprover(config)
         # self.clipboard = ClipboardManager(config)
 
@@ -163,7 +164,14 @@ class SpeakTypeApp(rumps.App):
         """
 
         audio_data = self.audio_handler.stop_recording()
-        print("Audio data:", audio_data)
+        self.update_app_state(AppStates.PROCESSING)
+
+        # TODO: Start processing pipeline in background thread
+        # - Transcribe audio using Whisper
+        # - Improve text using Ollama LLM
+        # - Copy to clipboard
+        # - Update state to PROCESSING during pipeline
+        # - Return to IDLE state when done
 
     def copy_last(self, sender):
         """
@@ -215,8 +223,6 @@ def main():
         app.run()
     except Exception as e:
         print(f"Failed to start application: {e}")
-        import traceback
-
         traceback.print_exc()
         return
 

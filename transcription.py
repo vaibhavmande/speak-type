@@ -11,15 +11,13 @@ LEARNING NOTE: This file demonstrates:
 - Memory management for ML models
 """
 
-# TODO: Import Whisper library
-# Install with: pip install openai-whisper
-# import whisper
+import whisper
+import traceback
 
 # TODO: Import numpy for audio data handling
 # import numpy as np
 
-# TODO: Import pathlib for file path handling
-# from pathlib import Path
+from pathlib import Path
 
 
 class WhisperTranscriber:
@@ -47,6 +45,12 @@ class WhisperTranscriber:
         4. Set model_loaded flag to False
         5. Create models directory path if it doesn't exist
         """
+        self.config = config.config
+        self.whisper_config = config.get_whisper_config()
+        self.model = None
+        self.model_loaded = False
+        self.models_dir = Path("models")
+        self.models_dir.mkdir(exist_ok=True)
         pass
 
     def load_model(self):
@@ -60,7 +64,7 @@ class WhisperTranscriber:
         - Loading ML models from disk or downloading
         - Model size selection (tiny, base, small, medium, large)
         - Device selection (CPU/GPU)
-        - Error handling for model loading
+        - Error handling for model
 
         TODO: Implement this method to:
         1. Check if model already loaded (return True if so)
@@ -71,7 +75,22 @@ class WhisperTranscriber:
         6. Print message showing which model was loaded
         7. Return True on success, False on failure
         """
-        pass
+
+        if self.model_loaded:
+            return True
+
+        try:
+            # get name and device
+            model_name = self.whisper_config.get("model", "base")
+            model_device = self.whisper_config.get("device", "cpu")
+
+            self.model = whisper.load_model(model_name, device=model_device)
+            self.model_loaded = True
+
+        except Exception as e:
+            print(f"Failed to load model: {e}")
+            traceback.print_exc()
+            return False
 
     def transcribe(self, audio_data):
         """
