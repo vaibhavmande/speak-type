@@ -11,6 +11,7 @@ LEARNING NOTE: This file demonstrates:
 - Memory management for ML models
 """
 
+from numba.cuda import fp16
 import whisper
 import traceback
 
@@ -56,24 +57,6 @@ class WhisperTranscriber:
     def load_model(self):
         """
         Load the Whisper model into memory.
-
-        Returns:
-            True if model loaded successfully, False otherwise
-
-        LEARNING NOTE: This method demonstrates:
-        - Loading ML models from disk or downloading
-        - Model size selection (tiny, base, small, medium, large)
-        - Device selection (CPU/GPU)
-        - Error handling for model
-
-        TODO: Implement this method to:
-        1. Check if model already loaded (return True if so)
-        2. Get model settings from config (model size, device)
-        3. Use whisper.load_model() to load the model
-        4. Store the model as instance variable
-        5. Set model_loaded flag to True
-        6. Print message showing which model was loaded
-        7. Return True on success, False on failure
         """
 
         if self.model_loaded:
@@ -86,13 +69,14 @@ class WhisperTranscriber:
 
             self.model = whisper.load_model(model_name, device=model_device)
             self.model_loaded = True
+            return True
 
         except Exception as e:
             print(f"Failed to load model: {e}")
             traceback.print_exc()
             return False
 
-    def transcribe(self, audio_data):
+    def transcribe(self, audio_data, language):
         """
         Transcribe audio data to text.
 
@@ -116,7 +100,26 @@ class WhisperTranscriber:
         5. Return the transcribed text
         6. Handle errors gracefully (return None)
         """
-        pass
+
+        if not self.model_loaded:
+            if not self.load_model():
+                return None
+
+        if audio_data is None or len(audio_data) == 0:
+            print(audio_data, len(audio_data))
+            print("No audio data provided for transcription")
+            return None
+
+        try:
+            result = self.model.transcribe(audio_data, language=language, fp16=False)
+            print("result=", result)
+            transcribed_text = result.get("text", "").strip()
+            return transcribed_text if transcribed_text else None
+
+        except Exception as e:
+            print(f"Error during transcription: {e}")
+            traceback.print_exc()
+            return None
 
     def transcribe_file(self, audio_file_path):
         """

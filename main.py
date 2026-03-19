@@ -66,6 +66,7 @@ class SpeakTypeApp(rumps.App):
         self.config = config.config
         self.config_instance = config
         self.app_config = config.get_app_config()
+        self.audio_config = config.get_audio_config()
 
         self.audio_handler = AudioHandler(config)
         self.transcriber = WhisperTranscriber(config)
@@ -165,6 +166,10 @@ class SpeakTypeApp(rumps.App):
 
         audio_data = self.audio_handler.stop_recording()
         self.update_app_state(AppStates.PROCESSING)
+        language = self.audio_config.get("language", "english")
+        transcribed = self.transcriber.transcribe(audio_data, language)
+
+        print("transcribed_audio=", transcribed)
 
         # TODO: Start processing pipeline in background thread
         # - Transcribe audio using Whisper

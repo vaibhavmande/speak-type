@@ -29,6 +29,7 @@ audio:
   silence_threshold: 0.01
   silence_duration: 2.0
   chunk_size: 1024
+  language: "english"
 
 clipboard:
   show_notifications: true
