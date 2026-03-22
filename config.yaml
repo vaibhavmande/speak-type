@@ -12,12 +12,13 @@ whisper:
 
 ollama:
   host: "http://localhost:11434"
-  model: "llama2"
+  model: "llama3.2:latest"
   prompt_template: |
     Please improve this transcribed text by:
     - Fixing any spelling or grammar errors
     - Adding proper punctuation
     - Making it more readable while preserving the meaning
+    - Print only improved text no explaination
 
     Original text: {text}
 

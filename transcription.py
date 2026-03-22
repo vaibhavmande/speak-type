@@ -112,7 +112,6 @@ class WhisperTranscriber:
 
         try:
             result = self.model.transcribe(audio_data, language=language, fp16=False)
-            print("result=", result)
             transcribed_text = result.get("text", "").strip()
             return transcribed_text if transcribed_text else None
 

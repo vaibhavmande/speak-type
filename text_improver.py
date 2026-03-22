@@ -11,15 +11,9 @@ LEARNING NOTE: This file demonstrates:
 - Error handling for network requests
 """
 
-# TODO: Import requests for HTTP API calls
-# Install with: pip install requests
-# import requests
-
-# TODO: Import json for API request/response handling
-# import json
-
-# TODO: Import time for timeout handling
-# import time
+import requests
+import json
+import time
 
 
 class TextImprover:
@@ -46,7 +40,10 @@ class TextImprover:
         3. Validate that required settings are present
         4. Set up API endpoint URL
         """
-        pass
+
+        self.config = config.config
+        self.ollama_config = config.get_ollama_config()
+        self.api_url = f"{self.ollama_config['host']}/api/generate"
 
     def improve_text(self, text):
         """
@@ -77,7 +74,32 @@ class TextImprover:
         6. Return improved text, or original if API fails
         7. Add timeout and retry logic for robustness
         """
-        pass
+
+        if len(text) <= 10:
+            return text
+
+        prompt_template = self.ollama_config.get("prompt_template")
+        prompt = f"{prompt_template.replace('{text}', text)}"
+
+        url = self.api_url
+        payload = {
+            "model": self.ollama_config.get("model"),
+            "prompt": prompt,
+            "max_token": 150,
+            "stream": False,
+        }
+
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            print("Request to Ollama successful")
+            json = response.json()
+            improved_text = json.get("response", None)
+            if improved_text is None:
+                raise Exception("response from Ollama is None")
+
+            print(improved_text)
+        else:
+            print(f"response={response.text}, status_code={response.status_code}")
 
     def _build_prompt(self, text):
         """

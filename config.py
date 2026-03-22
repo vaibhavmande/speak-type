@@ -39,10 +39,21 @@ class Config:
         return self.config["whisper"]
 
     def get_ollama_config(self):
-        if "ollama" not in self.config:
-            raise ValueError("'ollama' key not found in config")
+        ollama_settings = self.config.get("ollama", None)
 
-        return self.get("ollama")
+        if ollama_settings is None:
+            raise ValueError("'ollama' missing from configuration")
+
+        if "host" not in ollama_settings:
+            raise ValueError("'host' missing from configuration")
+
+        if "model" not in ollama_settings:
+            raise ValueError("'model' missing from configuration")
+
+        if "prompt_template" not in ollama_settings:
+            raise ValueError("'prompt_template' missing from configuration")
+
+        return ollama_settings
 
     def get_app_config(self):
         if "app" not in self.config:

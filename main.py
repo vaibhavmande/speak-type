@@ -22,8 +22,8 @@ LEARNING NOTE: This file demonstrates:
 from typing import Literal
 from audio_handler import AudioHandler
 from transcription import WhisperTranscriber
+from text_improver import TextImprover
 
-# from text_improver import TextImprover
 # from clipboard_manager import ClipboardManager
 
 import traceback
@@ -70,7 +70,7 @@ class SpeakTypeApp(rumps.App):
 
         self.audio_handler = AudioHandler(config)
         self.transcriber = WhisperTranscriber(config)
-        # self.improver = TextImprover(config)
+        self.improver = TextImprover(config)
         # self.clipboard = ClipboardManager(config)
 
         super(SpeakTypeApp, self).__init__(self.app_config.get("title"))
@@ -168,15 +168,11 @@ class SpeakTypeApp(rumps.App):
         self.update_app_state(AppStates.PROCESSING)
         language = self.audio_config.get("language", "english")
         transcribed = self.transcriber.transcribe(audio_data, language)
+        print(f"Transcribed text={transcribed}")
+        # for now send a dummy text
+        dummy_text = "Their are many benifits of using AI in healthcare. It not only helps in diagnosing diseases but also in providing personalized treatments."
 
-        print("transcribed_audio=", transcribed)
-
-        # TODO: Start processing pipeline in background thread
-        # - Transcribe audio using Whisper
-        # - Improve text using Ollama LLM
-        # - Copy to clipboard
-        # - Update state to PROCESSING during pipeline
-        # - Return to IDLE state when done
+        improved_text = self.improver.improve_text(dummy_text)
 
     def copy_last(self, sender):
         """
