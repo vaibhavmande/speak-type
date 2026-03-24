@@ -6,19 +6,8 @@ This is the main entry point for the SpeakType application.
 It creates a menu bar app that allows users to record audio,
 transcribe it using Whisper, improve the text using Ollama LLM,
 and copy the result to the clipboard.
-
-LEARNING NOTE: This file demonstrates:
-- Creating a macOS menu bar app using rumps
-- Orchestrating multiple components
-- Handling user interactions
-- Managing application state
 """
 
-# TODO: Import the rumps library for creating macOS menu bar apps
-# Install with: pip install rumps
-# import rumps
-
-# TODO: Import our custom modules (we'll create these next)
 from typing import Literal
 from audio_handler import AudioHandler
 from transcription import WhisperTranscriber
@@ -32,36 +21,16 @@ from app_states import AppStates
 
 import rumps
 
+rumps.debug_mode(True)
+
 
 class SpeakTypeApp(rumps.App):
     """
     Main application class that manages the menu bar interface
     and coordinates between different components.
-
-    LEARNING NOTE: This class shows how to:
-    - Create a menu bar app with multiple menu items
-    - Handle different application states (IDLE, RECORDING, PROCESSING)
-    - Coordinate between different components
     """
 
     def __init__(self, config):
-        """
-        Initialize the app with configuration and create all components.
-
-        Args:
-            config: Configuration object with settings for all components
-
-        TODO: Implement this method to:
-        1. Create a rumps.App instance with menu bar icon (🎤)
-        2. Initialize all components (audio_handler, transcriber, improver, clipboard)
-        3. Set up menu items: Start Recording, Stop Recording, Copy Last, Quit
-        4. Set initial state to IDLE
-        5. Store config and components as instance variables
-        """
-
-        # Implement app state IDLE, RECORDING, PROCESSING
-        # Change state from a member variable
-        # inside that function change menu icon and titles
 
         self.config = config.config
         self.config_instance = config
@@ -73,13 +42,25 @@ class SpeakTypeApp(rumps.App):
         self.improver = TextImprover(config)
         # self.clipboard = ClipboardManager(config)
 
-        super(SpeakTypeApp, self).__init__(self.app_config.get("title"))
-        menu_items = self.app_config.get("menu")
-        self.menu = [rumps.MenuItem(item) for item in menu_items]
+        super(SpeakTypeApp, self).__init__(
+            self.app_config.get("idle_icon"), menu=self.app_config.get("menu")
+        )
+        # menu_items = self.app_config.get("menu")
+        # self.menu = [rumps.MenuItem(item) for item in menu_items]
+        # self.menu = menu_items
 
-        self.update_app_state(AppStates.IDLE)
+        start_button = self.menu["Start Recording"]
+        stop_button = self.menu["Stop Recording"]
 
-        print("SpeakTypeApp initialized with config:", self.config)
+        stop_button.set_callback(None)
+        start_button.set_callback(None)
+        # self.update_app_state(AppStates.IDLE)
+
+        start_button.update(["Start Recording"])
+        stop_button.update(["Stop Recording"])
+
+        # print("SpeakTypeApp initialized with config:", self.config)
+        return
 
     def update_app_state(self, state):
         """
@@ -88,6 +69,7 @@ class SpeakTypeApp(rumps.App):
         activate/deactivate menu items
         """
         self.state = state
+        self.title = self.get_app_metadata().get("title")
 
         start_button = self.menu.get("Start Recording")
         stop_button = self.menu.get("Stop Recording")
@@ -105,13 +87,13 @@ class SpeakTypeApp(rumps.App):
                 start_button.set_callback(None)
                 stop_button.set_callback(None)
                 pass
+            case _:
+                self.update_app_state(AppStates.IDLE)
+
+        print(start_button)
+        print(stop_button)
 
     def get_app_metadata(self):
-        """
-        Get the application metadata.
-        get icon, title, menu items
-
-        """
 
         match self.state:
             case AppStates.IDLE:
@@ -127,42 +109,14 @@ class SpeakTypeApp(rumps.App):
 
     @rumps.clicked("Start Recording")
     def start_recording(self, sender):
-        """
-        Start audio recording when user clicks "Start Recording" menu item.
-
-        Args:
-            sender: The menu item that triggered this action
-
-        TODO: Implement this method to:
-        1. Call audio_handler.start_recording()
-        2. Update UI to show recording state (change menu item text/color)
-        3. Update internal state to RECORDING
-        4. Print a message to confirm recording started
-        """
 
         print("Starting recording...")
         self.update_app_state(AppStates.RECORDING)
-        self.title = self.get_app_metadata().get("title")
+        # self.title = self.get_app_metadata().get("title")
         self.audio_handler.start_recording()
 
     @rumps.clicked("Stop Recording")
     def stop_recording(self, sender):
-        """
-        Stop recording and start processing pipeline.
-
-        Args:
-            sender: The menu item that triggered this action
-
-        TODO: Implement this method to:
-        1. Call audio_handler.stop_recording() to get audio data
-        2. Update UI to show processing state
-        3. Start processing pipeline in background thread:
-           - Transcribe audio using Whisper
-           - Improve text using Ollama LLM
-           - Copy to clipboard
-        4. Update state to PROCESSING during pipeline
-        5. Return to IDLE state when done
-        """
 
         audio_data = self.audio_handler.stop_recording()
         self.update_app_state(AppStates.PROCESSING)
