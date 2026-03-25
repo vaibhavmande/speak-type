@@ -177,7 +177,13 @@ class WhisperTranscriber:
         3. Set model_loaded flag to False
         4. Force garbage collection to free memory
         """
-        pass
+        if self.model_loaded:
+            del self.model
+            self.model = None
+            self.model_loaded = False
+            import gc
+
+            gc.collect()
 
     def get_model_info(self):
         """

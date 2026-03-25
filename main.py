@@ -8,7 +8,6 @@ transcribe it using Whisper, improve the text using Ollama LLM,
 and copy the result to the clipboard.
 """
 
-from typing import Literal
 from audio_handler import AudioHandler
 from transcription import WhisperTranscriber
 from text_improver import TextImprover
@@ -45,22 +44,11 @@ class SpeakTypeApp(rumps.App):
         super(SpeakTypeApp, self).__init__(
             self.app_config.get("idle_icon"), menu=self.app_config.get("menu")
         )
-        # menu_items = self.app_config.get("menu")
-        # self.menu = [rumps.MenuItem(item) for item in menu_items]
-        # self.menu = menu_items
 
-        start_button = self.menu["Start Recording"]
-        stop_button = self.menu["Stop Recording"]
+        self.update_app_state(AppStates.IDLE)
+        rumps.events.before_quit.register(self.quit_app)
 
-        stop_button.set_callback(None)
-        start_button.set_callback(None)
-        # self.update_app_state(AppStates.IDLE)
-
-        start_button.update(["Start Recording"])
-        stop_button.update(["Stop Recording"])
-
-        # print("SpeakTypeApp initialized with config:", self.config)
-        return
+        print("SpeakTypeApp initialized with config:", self.config)
 
     def update_app_state(self, state):
         """
@@ -90,9 +78,6 @@ class SpeakTypeApp(rumps.App):
             case _:
                 self.update_app_state(AppStates.IDLE)
 
-        print(start_button)
-        print(stop_button)
-
     def get_app_metadata(self):
 
         match self.state:
@@ -107,7 +92,6 @@ class SpeakTypeApp(rumps.App):
 
         return {"title": title}
 
-    @rumps.clicked("Start Recording")
     def start_recording(self, sender):
 
         print("Starting recording...")
@@ -115,7 +99,6 @@ class SpeakTypeApp(rumps.App):
         # self.title = self.get_app_metadata().get("title")
         self.audio_handler.start_recording()
 
-    @rumps.clicked("Stop Recording")
     def stop_recording(self, sender):
 
         audio_data = self.audio_handler.stop_recording()
@@ -123,6 +106,7 @@ class SpeakTypeApp(rumps.App):
         language = self.audio_config.get("language", "english")
         transcribed = self.transcriber.transcribe(audio_data, language)
         print(f"Transcribed text={transcribed}")
+
         # for now send a dummy text
         dummy_text = "Their are many benifits of using AI in healthcare. It not only helps in diagnosing diseases but also in providing personalized treatments."
 
@@ -142,7 +126,7 @@ class SpeakTypeApp(rumps.App):
         """
         pass
 
-    def quit_app(self, sender):
+    def quit_app(self):
         """
         Clean up resources and quit the application.
 
@@ -154,6 +138,7 @@ class SpeakTypeApp(rumps.App):
         2. Save any necessary state
         3. Terminate the application
         """
+        self.transcriber.unload_model()
         pass
 
 
