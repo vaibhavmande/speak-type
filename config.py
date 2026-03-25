@@ -67,6 +67,12 @@ class Config:
 
         return self.get("audio")
 
+    def get_clipboard_config(self):
+        if "clipboard" not in self.config:
+            raise ValueError("'clipboard' key not found in config")
+
+        return self.get("clipboard")
+
 
 def load_config(config_path="config.yaml"):
     """

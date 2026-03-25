@@ -11,9 +11,7 @@ LEARNING NOTE: This file demonstrates:
 - User feedback mechanisms
 """
 
-# TODO: Import pyperclip for clipboard operations
-# Install with: pip install pyperclip
-# import pyperclip
+import pyperclip
 
 # TODO: Import rumps for macOS notifications
 # import rumps
@@ -46,7 +44,13 @@ class ClipboardManager:
         3. Store last copied text for potential reuse
         4. Initialize notification settings
         """
-        pass
+        self.config = config.config
+        self.clipboard_config = config.get_clipboard_config()
+        self.last_copied = None
+        self.show_notifications = self.clipboard_config.get("show_notifications", False)
+        self.notification_title = self.clipboard_config.get(
+            "notification_title", "SpeakType"
+        )
 
     def copy_to_clipboard(self, text):
         """
@@ -63,16 +67,26 @@ class ClipboardManager:
         - Input validation
         - Error handling for clipboard access
         - Success/failure feedback
-
-        TODO: Implement this method to:
-        1. Validate input text (not None, not empty)
-        2. Use pyperclip.copy() to copy text
-        3. Store text as last_copied for potential reuse
-        4. Show success notification if enabled
-        5. Return True on success, False on failure
-        6. Handle common clipboard errors (permission denied, etc.)
         """
-        pass
+        if text is None or not text.strip():
+            print("Cannot copy empty or None text to clipboard")
+            return False
+
+        try:
+            pyperclip.copy(text)
+            self.last_copied = text
+
+            if self.show_notifications:
+                print(f"✓ Text copied to clipboard: {text[:50]}...")
+
+            return True
+
+        except pyperclip.PyperclipException as e:
+            print(f"Clipboard error: {e}")
+            return False
+        except Exception as e:
+            print(f"Unexpected error copying to clipboard: {e}")
+            return False
 
     def get_clipboard_content(self):
         """

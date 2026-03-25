@@ -135,8 +135,9 @@ class AudioHandler:
             return None
 
         finally:
-            self.audio.terminate()
+            # self.audio.terminate()
             self.audio_buffer = []
+            self.recording = False
 
     def get_audio_level(self):
         """
@@ -187,3 +188,21 @@ class AudioHandler:
         if not self.is_recording():
             return 0.0
         return time.time() - self.start_time
+
+    def cleanup(self):
+        """
+        Clean up audio resources.
+        """
+        if self.stream is not None:
+            try:
+                if self.stream.is_active():
+                    self.stream.stop_stream()
+                self.stream.close()
+            except:
+                raise Exception("Error closing audio stream")
+
+        if self.audio is not None:
+            self.audio.terminate()
+
+        self.audio_buffer = []
+        self.recording = False

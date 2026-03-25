@@ -11,8 +11,7 @@ and copy the result to the clipboard.
 from audio_handler import AudioHandler
 from transcription import WhisperTranscriber
 from text_improver import TextImprover
-
-# from clipboard_manager import ClipboardManager
+from clipboard_manager import ClipboardManager
 
 import traceback
 from config import load_config
@@ -39,7 +38,7 @@ class SpeakTypeApp(rumps.App):
         self.audio_handler = AudioHandler(config)
         self.transcriber = WhisperTranscriber(config)
         self.improver = TextImprover(config)
-        # self.clipboard = ClipboardManager(config)
+        self.clipboard_manager = ClipboardManager(config)
 
         super(SpeakTypeApp, self).__init__(
             self.app_config.get("idle_icon"), menu=self.app_config.get("menu")
@@ -109,8 +108,11 @@ class SpeakTypeApp(rumps.App):
 
         # for now send a dummy text
         dummy_text = "Their are many benifits of using AI in healthcare. It not only helps in diagnosing diseases but also in providing personalized treatments."
-
         improved_text = self.improver.improve_text(dummy_text)
+        print(f"Improved text={improved_text}")
+
+        self.clipboard_manager.copy_to_clipboard(improved_text)
+        self.update_app_state(AppStates.IDLE)
 
     def copy_last(self, sender):
         """
@@ -139,7 +141,7 @@ class SpeakTypeApp(rumps.App):
         3. Terminate the application
         """
         self.transcriber.unload_model()
-        pass
+        self.audio_handler.cleanup()
 
 
 def main():
@@ -162,6 +164,7 @@ def main():
         app = SpeakTypeApp(config)
         app.run()
     except Exception as e:
+        app.update_app_state(AppStates.IDLE)
         print(f"Failed to start application: {e}")
         traceback.print_exc()
         return

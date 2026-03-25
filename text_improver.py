@@ -12,8 +12,6 @@ LEARNING NOTE: This file demonstrates:
 """
 
 import requests
-import json
-import time
 
 
 class TextImprover:
@@ -78,9 +76,30 @@ class TextImprover:
         if len(text) <= 10:
             return text
 
-        prompt_template = self.ollama_config.get("prompt_template")
-        prompt = f"{prompt_template.replace('{text}', text)}"
+        prompt = self._build_prompt(text)
+        response_data = self._make_api_request(prompt)
 
+        if response_data is None:
+            raise Exception("No response from Ollama")
+
+        improved_text = self._extract_improved_text(response_data)
+        if improved_text is None:
+            raise Exception("No improved text extracted from response")
+
+        return improved_text
+
+    def _build_prompt(self, text):
+        """
+        Build a prompt for the LLM using the template from config.
+        """
+
+        template = self.ollama_config.get("prompt_template")
+        return template.replace("{text}", text)
+
+    def _make_api_request(self, prompt):
+        """
+        Make API request to Ollama with the given prompt.
+        """
         url = self.api_url
         payload = {
             "model": self.ollama_config.get("model"),
@@ -91,139 +110,16 @@ class TextImprover:
 
         response = requests.post(url, json=payload)
         if response.status_code == 200:
-            print("Request to Ollama successful")
-            json = response.json()
-            improved_text = json.get("response", None)
-            if improved_text is None:
-                raise Exception("response from Ollama is None")
-
-            print(improved_text)
+            return response.json()
         else:
             print(f"response={response.text}, status_code={response.status_code}")
-
-    def _build_prompt(self, text):
-        """
-        Build a prompt for the LLM using the template from config.
-
-        Args:
-            text: Original text to include in prompt
-
-        Returns:
-            Formatted prompt string
-
-        LEARNING NOTE: This method demonstrates:
-        - String formatting and templating
-        - Configuration-driven prompt engineering
-        - Text preprocessing
-
-        TODO: Implement this method to:
-        1. Get prompt template from config
-        2. Replace {text} placeholder with actual text
-        3. Clean up any formatting issues
-        4. Return the formatted prompt
-        """
-        pass
-
-    def _make_api_request(self, prompt):
-        """
-        Make API request to Ollama with the given prompt.
-
-        Args:
-            prompt: Formatted prompt to send to LLM
-
-        Returns:
-            API response data, or None if request fails
-
-        LEARNING NOTE: This method demonstrates:
-        - HTTP POST requests with JSON
-        - API error handling
-        - Response validation
-        - Network timeout management
-
-        TODO: Implement this method to:
-        1. Set up request headers (Content-Type: application/json)
-        2. Create request payload with model and prompt
-        3. Make POST request to Ollama generate endpoint
-        4. Handle different response status codes
-        5. Parse JSON response
-        6. Return response data or None on failure
-        7. Implement retry logic for transient errors
-        """
-        pass
+            raise Exception("Failed to make API request to Ollama")
 
     def _extract_improved_text(self, response_data):
         """
         Extract the improved text from API response.
-
-        Args:
-            response_data: Raw API response data
-
-        Returns:
-            Improved text string, or None if extraction fails
-
-        LEARNING NOTE: This method demonstrates:
-        - JSON data extraction
-        - Response validation
-        - Data cleaning and formatting
-
-        TODO: Implement this method to:
-        1. Check if response contains expected fields
-        2. Extract the generated text from response
-        3. Clean up any extra whitespace or formatting
-        4. Validate that improved text is not empty
-        5. Return the cleaned text or None
         """
-        pass
-
-    def test_connection(self):
-        """
-        Test connection to Ollama API.
-
-        Returns:
-            True if connection successful, False otherwise
-
-        LEARNING NOTE: This method demonstrates:
-        - Health checking for external services
-        - Simple API connectivity tests
-        - Service availability validation
-
-        TODO: Implement this method to:
-        1. Make simple request to Ollama API
-        2. Check if service responds
-        3. Return True if healthy, False otherwise
-        """
-        pass
-
-    def get_available_models(self):
-        """
-        Get list of available models from Ollama.
-
-        Returns:
-            List of model names, or empty list if request fails
-
-        LEARNING NOTE: This method demonstrates:
-        - Discovering available resources from APIs
-        - Dynamic configuration options
-        - API endpoint exploration
-
-        TODO: Implement this method to:
-        1. Make request to Ollama models endpoint
-        2. Parse list of available models
-        3. Return model names as list
-        4. Return empty list if request fails
-        """
-        pass
-
-    def is_available(self):
-        """
-        Check if Ollama service is available.
-
-        Returns:
-            True if service is available, False otherwise
-
-        TODO: Implement this method to:
-        1. Use test_connection() to check service
-        2. Cache result for short period to avoid repeated checks
-        3. Return availability status
-        """
-        pass
+        if response_data:
+            response = response_data.get("response")
+            return response.strip() if response else None
+        return None

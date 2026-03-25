@@ -106,7 +106,6 @@ class WhisperTranscriber:
                 return None
 
         if audio_data is None or len(audio_data) == 0:
-            print(audio_data, len(audio_data))
             print("No audio data provided for transcription")
             return None
 
