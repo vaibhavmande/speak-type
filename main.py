@@ -100,8 +100,8 @@ class SpeakTypeApp(rumps.App):
 
     def stop_recording(self, sender):
 
-        audio_data = self.audio_handler.stop_recording()
         self.update_app_state(AppStates.PROCESSING)
+        audio_data = self.audio_handler.stop_recording()
         language = self.audio_config.get("language", "english")
         transcribed = self.transcriber.transcribe(audio_data, language)
         print(f"Transcribed text={transcribed}")
@@ -145,20 +145,6 @@ class SpeakTypeApp(rumps.App):
 
 
 def main():
-    """
-    Main entry point for the application.
-
-    LEARNING NOTE: This function demonstrates:
-    - Loading configuration from a file
-    - Creating and running the main application
-    - Basic error handling
-
-    TODO: Implement this function to:
-    1. Load configuration from config.yaml (use load_config function)
-    2. Create a SpeakTypeApp instance with the config
-    3. Run the menu bar app (this will keep it running until user quits)
-    4. Add basic error handling for config loading
-    """
     try:
         config = load_config("config.yaml")
         app = SpeakTypeApp(config)
@@ -170,7 +156,5 @@ def main():
         return
 
 
-# This is the standard Python pattern for making a file executable
-# When this file is run directly (not imported), __name__ will be "__main__"
 if __name__ == "__main__":
     main()

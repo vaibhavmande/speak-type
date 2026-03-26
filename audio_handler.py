@@ -122,6 +122,7 @@ class AudioHandler:
         try:
             self.stream.stop_stream()
             self.stream.close()
+            self.stream = None
             self.recording = False
 
             if self.audio_buffer:
@@ -138,6 +139,7 @@ class AudioHandler:
             # self.audio.terminate()
             self.audio_buffer = []
             self.recording = False
+            self.stream = None
 
     def get_audio_level(self):
         """
@@ -198,11 +200,20 @@ class AudioHandler:
                 if self.stream.is_active():
                     self.stream.stop_stream()
                 self.stream.close()
-            except:
-                raise Exception("Error closing audio stream")
+            except OSError as e:
+                print(f"Error closing audio stream: {e}")
+            except Exception as e:
+                print(f"Error closing audio stream: {e}")
+            finally:
+                self.stream = None
 
         if self.audio is not None:
-            self.audio.terminate()
+            try:
+                self.audio.terminate()
+            except Exception as e:
+                print(f"Error terminating PyAudio: {e}")
+            finally:
+                self.audio = None
 
         self.audio_buffer = []
         self.recording = False
