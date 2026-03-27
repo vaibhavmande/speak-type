@@ -14,6 +14,7 @@ from text_improver import TextImprover
 from clipboard_manager import ClipboardManager
 
 import traceback
+import threading
 from config import load_config
 from app_states import AppStates
 
@@ -34,6 +35,8 @@ class SpeakTypeApp(rumps.App):
         self.config_instance = config
         self.app_config = config.get_app_config()
         self.audio_config = config.get_audio_config()
+        self.state = AppStates.IDLE
+        self.last_text = None
 
         self.audio_handler = AudioHandler(config)
         self.transcriber = WhisperTranscriber(config)
@@ -48,6 +51,48 @@ class SpeakTypeApp(rumps.App):
         rumps.events.before_quit.register(self.quit_app)
 
         print("SpeakTypeApp initialized with config:", self.config)
+
+    def start_recording(self, sender):
+
+        print("Starting recording...")
+        self.update_app_state(AppStates.RECORDING)
+
+        def start_audio():
+            self.audio_handler.start_recording()
+
+        thread = threading.Thread(target=start_audio)
+        thread.daemon = True
+        thread.start()
+
+    def stop_recording(self, sender):
+
+        self.update_app_state(AppStates.PROCESSING)
+
+        def process_audio():
+            audio_data = self.audio_handler.stop_recording()
+            language = self.audio_config.get("language", "english")
+            transcribed = self.transcriber.transcribe(audio_data, language)
+            print(f"Transcribed text={transcribed}")
+
+            # for now send a dummy text
+            dummy_text = "Their are many benifits of using AI in healthcare. It not only helps in diagnosing diseases but also in providing personalized treatments."
+            improved_text = self.improver.improve_text(dummy_text)
+            print(f"Improved text={improved_text}")
+
+            self.clipboard_manager.copy_to_clipboard(improved_text)
+            self.last_text = improved_text
+            self.update_app_state(AppStates.IDLE)
+
+        thread = threading.Thread(target=process_audio)
+        thread.daemon = True
+        thread.start()
+
+    def copy_last(self, sender):
+
+        if self.last_text:
+            self.clipboard_manager.copy_to_clipboard(self.last_text)
+        else:
+            print("No text to copy")
 
     def update_app_state(self, state):
         """
@@ -91,55 +136,8 @@ class SpeakTypeApp(rumps.App):
 
         return {"title": title}
 
-    def start_recording(self, sender):
-
-        print("Starting recording...")
-        self.update_app_state(AppStates.RECORDING)
-        # self.title = self.get_app_metadata().get("title")
-        self.audio_handler.start_recording()
-
-    def stop_recording(self, sender):
-
-        self.update_app_state(AppStates.PROCESSING)
-        audio_data = self.audio_handler.stop_recording()
-        language = self.audio_config.get("language", "english")
-        transcribed = self.transcriber.transcribe(audio_data, language)
-        print(f"Transcribed text={transcribed}")
-
-        # for now send a dummy text
-        dummy_text = "Their are many benifits of using AI in healthcare. It not only helps in diagnosing diseases but also in providing personalized treatments."
-        improved_text = self.improver.improve_text(dummy_text)
-        print(f"Improved text={improved_text}")
-
-        self.clipboard_manager.copy_to_clipboard(improved_text)
-        self.update_app_state(AppStates.IDLE)
-
-    def copy_last(self, sender):
-        """
-        Copy the last processed result to clipboard.
-
-        Args:
-            sender: The menu item that triggered this action
-
-        TODO: Implement this method to:
-        1. Get the last processed text from storage
-        2. Use clipboard_manager to copy it
-        3. Show a notification to confirm copy
-        """
-        pass
-
     def quit_app(self):
-        """
-        Clean up resources and quit the application.
 
-        Args:
-            sender: The menu item that triggered this action
-
-        TODO: Implement this method to:
-        1. Clean up any resources (close audio streams, unload models)
-        2. Save any necessary state
-        3. Terminate the application
-        """
         self.transcriber.unload_model()
         self.audio_handler.cleanup()
 
