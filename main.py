@@ -16,7 +16,7 @@ from clipboard_manager import ClipboardManager
 import traceback
 import threading
 from config import load_config
-from app_states import AppStates
+from app_states import AppStates, get_app_metadata
 
 import rumps
 
@@ -101,7 +101,7 @@ class SpeakTypeApp(rumps.App):
         activate/deactivate menu items
         """
         self.state = state
-        self.title = self.get_app_metadata().get("title")
+        self.title = get_app_metadata(self.state, self.app_config).get("title")
 
         start_button = self.menu.get("Start Recording")
         stop_button = self.menu.get("Stop Recording")
@@ -121,20 +121,6 @@ class SpeakTypeApp(rumps.App):
                 pass
             case _:
                 self.update_app_state(AppStates.IDLE)
-
-    def get_app_metadata(self):
-
-        match self.state:
-            case AppStates.IDLE:
-                title = self.app_config.get("idle_icon")
-            case AppStates.RECORDING:
-                title = self.app_config.get("recording_icon")
-            case AppStates.PROCESSING:
-                title = self.app_config.get("processing_icon")
-            case _:
-                title = self.app_config.get("idle_icon")
-
-        return {"title": title}
 
     def quit_app(self):
 
