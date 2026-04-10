@@ -9,9 +9,6 @@ import pyaudio
 import numpy as np
 import time
 
-# TODO: Import threading for background audio processing
-# import threading
-
 
 class AudioHandler:
     """

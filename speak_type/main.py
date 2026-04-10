@@ -8,19 +8,17 @@ transcribe it using Whisper, improve the text using Ollama LLM,
 and copy the result to the clipboard.
 """
 
-from audio_handler import AudioHandler
-from transcription import WhisperTranscriber
-from text_improver import TextImprover
-from clipboard_manager import ClipboardManager
+from .audio_handler import AudioHandler
+from .transcription import WhisperTranscriber
+from .text_improver import TextImprover
+from .clipboard_manager import ClipboardManager
 
 import traceback
 import threading
-from config import load_config
-from app_states import AppStates, get_app_metadata
+from .config import load_config
+from .app_states import AppStates, get_app_metadata
 
 import rumps
-
-rumps.debug_mode(True)
 
 
 class SpeakTypeApp(rumps.App):
@@ -74,9 +72,7 @@ class SpeakTypeApp(rumps.App):
             transcribed = self.transcriber.transcribe(audio_data, language)
             print(f"Transcribed text={transcribed}")
 
-            # for now send a dummy text
-            dummy_text = "Their are many benifits of using AI in healthcare. It not only helps in diagnosing diseases but also in providing personalized treatments."
-            improved_text = self.improver.improve_text(dummy_text)
+            improved_text = self.improver.improve_text(transcribed)
             print(f"Improved text={improved_text}")
 
             self.clipboard_manager.copy_to_clipboard(improved_text)

@@ -39,10 +39,30 @@ A privacy-first, local-only speech-to-text application that converts speech to i
 ### Usage
 
 ```bash
-python main.py
+python run.py
 ```
 
 The app will appear in your menu bar. Click the menu icon to start recording, speak naturally, then click stop. The improved text will be copied to your clipboard.
+
+## Project Structure
+
+```
+speak-type/
+├── speak_type/          # Main package directory
+│   ├── __init__.py
+│   ├── main.py          # Application entry point
+│   ├── audio_handler.py # Audio recording
+│   ├── transcription.py # Whisper integration
+│   ├── text_improver.py # Ollama LLM integration
+│   ├── clipboard_manager.py
+│   ├── config.py        # Configuration management
+│   └── app_states.py    # Application state management
+├── run.py               # Launch script
+├── config.yaml          # Configuration file
+├── docs/                # Documentation
+├── tests/               # Test files
+└── README.md
+```
 
 ## How It Works
 
