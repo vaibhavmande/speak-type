@@ -1,22 +1,11 @@
-"""
-Audio recording and processing for SpeakType application.
-
-This module handles microphone recording, audio format conversion,
-and silence detection. It provides clean audio data for transcription.
-"""
-
 import pyaudio
 import numpy as np
 import time
 
 
 class AudioHandler:
-    """
-    Handles audio recording and provides audio data for transcription.
-    """
 
     def __init__(self, config):
-
         self.audio_config = config.get_audio_config()
 
         self.recording = False
@@ -30,10 +19,7 @@ class AudioHandler:
         self.sample_rate = self.audio_config.get("sample_rate", 16000)
         self.chunk_size = self.audio_config.get("chunk_size", 1024)
 
-        pass
-
     def start_recording(self):
-
         if self.recording:
             return False
 
@@ -58,7 +44,6 @@ class AudioHandler:
             return False
 
     def stop_recording(self):
-
         if not self.is_recording():
             return None
 
@@ -79,15 +64,11 @@ class AudioHandler:
             return None
 
         finally:
-            # self.audio.terminate()
             self.audio_buffer = []
             self.recording = False
             self.stream = None
 
     def get_audio_level(self):
-        """
-        Calculate the current audio level (RMS amplitude).
-        """
         if not self.is_recording():
             return 0.0
 
@@ -96,14 +77,9 @@ class AudioHandler:
             return 0.0
 
         rms = np.sqrt(np.mean(recent_audio**2))
-
-        # Normalize to 0.0-1.0 range
         return min(rms * 10, 1.0)
 
     def _audio_callback(self, in_data, frame_count, time_info, status):
-        """
-        Callback function called by PyAudio when new audio data is available.
-        """
         audio_chunk = np.frombuffer(in_data, dtype=np.int16)
         audio_chunk = audio_chunk.astype(np.float32) / 32768.0
         self.audio_buffer.append(audio_chunk)

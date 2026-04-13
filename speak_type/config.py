@@ -1,11 +1,3 @@
-"""
-Configuration management for SpeakType application.
-
-This module handles loading and accessing configuration settings
-from YAML files. It provides a clean interface for other components
-to access their settings.
-"""
-
 import yaml
 from pathlib import Path
 
@@ -75,10 +67,6 @@ class Config:
 
 
 def load_config(config_path="config.yaml"):
-    """
-    Load configuration from a YAML file.
-    Returns config object with loaded settings
-    """
 
     config_file_path = Path(config_path)
     if not config_file_path.exists():
@@ -101,10 +89,6 @@ def load_config(config_path="config.yaml"):
 
 
 def validate_config(config_data):
-    """
-    Validate important configuration settings.
-    Raises ValueError if any validation fails.
-    """
 
     # Validate Whisper model
     valid_whisper_models = ["tiny", "base", "small", "medium", "large"]

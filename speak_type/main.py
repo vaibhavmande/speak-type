@@ -1,12 +1,4 @@
 #!/usr/bin/env python3
-"""
-SpeakType - Voice-to-Text Transcription and Improvement Tool
-
-This is the main entry point for the SpeakType application.
-It creates a menu bar app that allows users to record audio,
-transcribe it using Whisper, improve the text using Ollama LLM,
-and copy the result to the clipboard.
-"""
 
 from .audio_handler import AudioHandler
 from .transcription import WhisperTranscriber
@@ -22,13 +14,8 @@ import rumps
 
 
 class SpeakTypeApp(rumps.App):
-    """
-    Main application class that manages the menu bar interface
-    and coordinates between different components.
-    """
 
     def __init__(self, config):
-
         self.config = config.config
         self.config_instance = config
         self.app_config = config.get_app_config()
@@ -51,7 +38,6 @@ class SpeakTypeApp(rumps.App):
         print("SpeakTypeApp initialized with config:", self.config)
 
     def start_recording(self, sender):
-
         print("Starting recording...")
         self.update_app_state(AppStates.RECORDING)
 
@@ -63,7 +49,6 @@ class SpeakTypeApp(rumps.App):
         thread.start()
 
     def stop_recording(self, sender):
-
         self.update_app_state(AppStates.PROCESSING)
 
         def process_audio():
@@ -89,18 +74,12 @@ class SpeakTypeApp(rumps.App):
         thread.start()
 
     def copy_last(self, sender):
-
         if self.last_text:
             self.clipboard_manager.copy_to_clipboard(self.last_text)
         else:
             print("No text to copy")
 
     def update_app_state(self, state):
-        """
-        Update the application state and UI.
-        IDLE, RECORDING, PROCESSING
-        activate/deactivate menu items
-        """
         self.state = state
         self.title = get_app_metadata(self.state, self.app_config).get("title")
 
@@ -111,20 +90,16 @@ class SpeakTypeApp(rumps.App):
             case AppStates.IDLE:
                 stop_button.set_callback(None)
                 start_button.set_callback(self.start_recording)
-                pass
             case AppStates.RECORDING:
                 start_button.set_callback(None)
                 stop_button.set_callback(self.stop_recording)
-                pass
             case AppStates.PROCESSING:
                 start_button.set_callback(None)
                 stop_button.set_callback(None)
-                pass
             case _:
                 self.update_app_state(AppStates.IDLE)
 
     def quit_app(self):
-
         self.transcriber.unload_model()
         self.audio_handler.cleanup()
 

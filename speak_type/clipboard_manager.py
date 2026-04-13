@@ -3,9 +3,6 @@ from rumps import notification
 
 
 class ClipboardManager:
-    """
-    Manages clipboard operations and user notifications.
-    """
 
     def __init__(self, config):
         self.config = config.config
@@ -69,7 +66,6 @@ class ClipboardManager:
         except Exception as e:
             print(f"🔔 {self.notification_title}: {message}")
             print(f"Notification error: {e}")
-        pass
 
     def clear_clipboard(self):
         try:

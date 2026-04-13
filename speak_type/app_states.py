@@ -5,7 +5,6 @@ class AppStates:
 
 
 def get_app_metadata(state, app_config):
-
     match state:
         case AppStates.IDLE:
             title = app_config.get("idle_icon")

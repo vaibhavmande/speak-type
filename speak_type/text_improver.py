@@ -9,9 +9,6 @@ import requests
 
 
 class TextImprover:
-    """
-    Handles text improvement using Ollama LLM.
-    """
 
     def __init__(self, config):
         self.config = config.config

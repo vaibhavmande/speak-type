@@ -11,9 +11,6 @@ from pathlib import Path
 
 
 class WhisperTranscriber:
-    """
-    Handles speech-to-text transcription using OpenAI Whisper models.
-    """
 
     def __init__(self, config):
         self.config = config.config
@@ -22,7 +19,6 @@ class WhisperTranscriber:
         self.model_loaded = False
         self.models_dir = Path("models")
         self.models_dir.mkdir(exist_ok=True)
-        pass
 
     def load_model(self):
         if self.model_loaded:
