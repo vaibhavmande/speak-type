@@ -72,8 +72,13 @@ class SpeakTypeApp(rumps.App):
             transcribed = self.transcriber.transcribe(audio_data, language)
             print(f"Transcribed text={transcribed}")
 
-            improved_text = self.improver.improve_text(transcribed)
-            print(f"Improved text={improved_text}")
+            try:
+                improved_text = self.improver.improve_text(transcribed)
+                print(f"Improved text={improved_text}")
+            except Exception as e:
+                print(f"Error improving text: {e}")
+                self.update_app_state(AppStates.IDLE)
+                improved_text = transcribed
 
             self.clipboard_manager.copy_to_clipboard(improved_text)
             self.last_text = improved_text

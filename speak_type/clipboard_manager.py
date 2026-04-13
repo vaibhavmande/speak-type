@@ -39,25 +39,6 @@ class ClipboardManager:
             self.notify_error()
             return False
 
-    def get_clipboard_content(self):
-        """
-        Get the current clipboard content.
-
-        Returns:
-            Current clipboard text, or None if error
-
-        LEARNING NOTE: This method demonstrates:
-        - Reading from system clipboard
-        - Safe clipboard access
-        - Error handling for read operations
-
-        TODO: Implement this method to:
-        1. Use pyperclip.paste() to get clipboard content
-        2. Return the text or None if error
-        3. Handle clipboard access errors
-        """
-        pass
-
     def notify_user(self, title, message):
         if not self.show_notifications:
             return

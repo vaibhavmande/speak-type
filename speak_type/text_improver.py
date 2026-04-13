@@ -48,12 +48,19 @@ class TextImprover:
             "stream": False,
         }
 
-        response = requests.post(url, json=payload)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            print(f"response={response.text}, status_code={response.status_code}")
-            raise Exception("Failed to make API request to Ollama")
+        try:
+            response = requests.post(url, json=payload)
+            if response.status_code == 200:
+                return response.json()
+            else:
+                print(f"response={response.text}, status_code={response.status_code}")
+                raise Exception("Failed to make API request to Ollama")
+        except requests.exceptions.RequestException as e:
+            print(f"Request failed: {e}")
+            raise Exception(f"Network error when calling Ollama API: {e}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            raise Exception(f"Unexpected error when calling Ollama API: {e}")
 
     def _extract_improved_text(self, response_data):
         if response_data:
