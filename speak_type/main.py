@@ -38,7 +38,6 @@ class SpeakTypeApp(rumps.App):
         print("SpeakTypeApp initialized with config:", self.config)
 
     def start_recording(self, sender):
-        print("Starting recording...")
         self.update_app_state(AppStates.RECORDING)
 
         def start_audio():
@@ -55,11 +54,9 @@ class SpeakTypeApp(rumps.App):
             audio_data = self.audio_handler.stop_recording()
             language = self.audio_config.get("language", "english")
             transcribed = self.transcriber.transcribe(audio_data, language)
-            print(f"Transcribed text={transcribed}")
 
             try:
                 improved_text = self.improver.improve_text(transcribed)
-                print(f"Improved text={improved_text}")
             except Exception as e:
                 print(f"Error improving text: {e}")
                 self.update_app_state(AppStates.IDLE)
@@ -67,6 +64,7 @@ class SpeakTypeApp(rumps.App):
 
             self.clipboard_manager.copy_to_clipboard(improved_text)
             self.last_text = improved_text
+            print("Improvement completed. Text is ready to be pasted")
             self.update_app_state(AppStates.IDLE)
 
         thread = threading.Thread(target=process_audio)
