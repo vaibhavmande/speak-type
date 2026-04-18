@@ -19,7 +19,7 @@ A privacy-first, local-only speech-to-text application that converts speech to i
    ```bash
    brew install ollama
    ollama serve
-   ollama pull llama3.2:3b
+   ollama pull llama3.2:latest
    ```
 
 2. **Install PortAudio (required for PyAudio on macOS)**
@@ -31,7 +31,7 @@ A privacy-first, local-only speech-to-text application that converts speech to i
 3. **Install Python dependencies**
 
    ```bash
-   pip install pyaudio numpy openai-whisper requests pyperclip rumps pyyaml
+   pip install -r requirements.txt
    ```
 
 4. **Grant microphone permissions** (macOS System Preferences → Security & Privacy → Privacy)
@@ -66,20 +66,22 @@ speak-type/
 
 ## How It Works
 
-1. Click "Start Recording" from the menu bar
+1. Click "Start Recording" from the menu bar (icon changes to ⏺️)
 2. Speak into your microphone
 3. Click "Stop Recording"
-4. Audio is transcribed using Whisper
-5. Text is improved using local LLM (Ollama)
-6. Improved text is automatically copied to clipboard
-7. Paste with Cmd+V wherever you need it
-8. Use "Copy Last" to re-copy the previous result
+4. App enters processing mode (icon changes to ⏳)
+5. Audio is transcribed using Whisper
+6. Text is improved using local LLM (Ollama)
+7. Improved text is automatically copied to clipboard
+8. You'll receive a notification with a preview of the text
+9. Paste with Cmd+V wherever you need it
+10. Use "Copy Last" to re-copy the previous result
 
 ## Tech Stack
 
-- **Core**: Python 3.10+
-- **Speech Recognition**: OpenAI Whisper (Python)
-- **Text Improvement**: Ollama with local LLM
+- **Core**: Python 3.12+
+- **Speech Recognition**: OpenAI Whisper (openai-whisper>=20231117)
+- **Text Improvement**: Ollama with local LLM (llama3.2:latest)
 - **Audio**: PyAudio + numpy
 - **UI**: rumps (macOS menu bar)
 - **Clipboard**: pyperclip
@@ -89,17 +91,54 @@ speak-type/
 
 Edit `config.yaml` to customize:
 
-- Whisper model selection
-- LLM model and settings
-- Audio parameters
-- Privacy options
+- **Whisper**: Model selection (tiny, base, small, medium, large), language, device (cpu/cuda)
+- **Ollama**: Host URL, model name, custom prompt template
+- **Audio**: Sample rate, channels, silence detection, chunk size
+- **App**: Menu icons, notification settings
+- **Clipboard**: Notification preferences
+
+See `config.yaml` for all available options and defaults.
 
 ## Privacy
 
 ✅ All processing happens locally  
-✅ No external API calls  
+✅ No external cloud API calls (only local Ollama server)  
 ✅ Audio buffers cleared after processing  
-✅ No transcription logging by default
+✅ No transcription logging by default  
+✅ No data leaves your machine
+
+## Troubleshooting
+
+### Ollama Connection Issues
+
+Ensure Ollama is running:
+
+```bash
+ollama serve
+```
+
+Verify the model is downloaded:
+
+```bash
+ollama list
+```
+
+### Microphone Not Working
+
+- Grant microphone permissions in System Preferences → Security & Privacy → Privacy → Microphone
+- Ensure Python/Terminal has microphone access
+
+### PyAudio Installation Fails
+
+Make sure PortAudio is installed:
+
+```bash
+brew install portaudio
+```
+
+### No Notifications Appearing
+
+Check notification permissions for Python/Terminal in System Preferences → Notifications
 
 ## Development
 
