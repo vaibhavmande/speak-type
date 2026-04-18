@@ -65,6 +65,19 @@ class SpeakTypeApp(rumps.App):
             self.clipboard_manager.copy_to_clipboard(improved_text)
             self.last_text = improved_text
             print("Improvement completed. Text is ready to be pasted")
+
+            preview_length = 30
+            preview_text = improved_text[:preview_length]
+            if len(improved_text) > preview_length:
+                preview_text += "..."
+
+            rumps.notification(
+                title="Text Ready to Paste",
+                subtitle="Copied to clipboard",
+                message=preview_text,
+                sound=False,
+            )
+
             self.update_app_state(AppStates.IDLE)
 
         thread = threading.Thread(target=process_audio)
