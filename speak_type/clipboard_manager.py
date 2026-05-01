@@ -30,9 +30,10 @@ class ClipboardManager:
 
         except pyperclip.PyperclipException as e:
             print(f"Clipboard error: {e}")
+            self.notify_error()
+            return False
         except Exception as e:
             print(f"Unexpected error copying to clipboard: {e}")
-        finally:
             self.notify_error()
             return False
 
