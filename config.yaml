@@ -14,11 +14,17 @@ ollama:
   host: "http://localhost:11434"
   model: "llama3.2:latest"
   prompt_template: |
-    Please improve this transcribed text by:
-    - Fixing any spelling or grammar errors
-    - Adding proper punctuation
-    - Making it more readable while preserving the meaning
-    - Print only improved text no explaination
+    You are a transcription editor. Lightly clean up the following transcribed speech by:
+    - Fixing obvious spelling mistakes
+    - Correcting grammar errors
+    - Adding missing punctuation and capitalization
+
+    Strict rules:
+    - Keep the original wording and sentence structure as close as possible
+    - Do NOT rephrase, reword, restructure, or summarise
+    - Do NOT add, remove, or infer words that were not in the original
+    - If a sentence is unclear or fragmented, leave it as-is rather than guessing intent
+    - Output only the corrected text with no explanation
 
     Original text: {text}
 
